@@ -160,6 +160,7 @@ __global__ void GAIA::solveMaterialGPU_oneThreadForLoop(TetMeshFEMGPU_NeoHookean
 
 void GAIA::solveMaterialParallelOnCPU(int32_t* pTetParallelizationGroup, int32_t tetParallelizationGroupSize, TetMeshFEMGPU_NeoHookean* pTetMeshGPU)
 {
+#ifdef _DEBUG
 	cpu_parallel_for(0, tetParallelizationGroupSize, [&](int iTet)
 		{
 			int32_t tetId = pTetParallelizationGroup[iTet];
@@ -193,6 +194,7 @@ void GAIA::solveMaterialParallelOnCPU(int32_t* pTetParallelizationGroup, int32_t
 			FloatingTypeGPU CVol = solveVolConstraint(tetId, v0, v1, v2, v3, gradVol, pTetMeshGPU->DmInvs);
 			applyToInfiniteStiffness(pTetMeshGPU->vertPos, pTetMeshGPU->vertexInvMass, tetId, tetVIds, CVol, gradVol);
 		});
+#endif
 }
 
 void GAIA::test_MaterialSolve_oneTet_call(int32_t iTet, TetMeshFEMGPU_NeoHookean* pTetMeshGPU, FloatingTypeGPU* gradDev, FloatingTypeGPU* CDev)
@@ -243,7 +245,8 @@ __host__ __device__ void GAIA::solveMaterialForOneTet(int32_t tetId, FloatingTyp
 	return ;
 }
 
-__forceinline __host__ __device__ void GAIA::solveMaterialForOneTet(int32_t tetId, TetMeshFEMGPU_NeoHookean* pTetMeshGPU)
+//__forceinline __host__ __device__ void GAIA::solveMaterialForOneTet(int32_t tetId, TetMeshFEMGPU_NeoHookean* pTetMeshGPU)
+__device__ __host__ __forceinline__ void GAIA::solveMaterialForOneTet(int32_t tetId, TetMeshFEMGPU_NeoHookean* pTetMeshGPU)
 {
 	//printf("Solving material for: %d\n", tetId);
 

@@ -20,6 +20,7 @@ void GAIA::solveBoxBoundaryConstraint(cudaStream_t stream, int32_t numVerts, int
 
 void GAIA::solveBoxBoundaryConstraintOnCPU(PBDTetMeshFEMGPU* pTetMeshGPU, FloatingTypeGPU xMin, FloatingTypeGPU xMax, FloatingTypeGPU yMin, FloatingTypeGPU yMax, FloatingTypeGPU zMin, FloatingTypeGPU zMax, FloatingTypeGPU boundaryFritionStatic, FloatingTypeGPU boundaryFritionDynamic)
 {
+#ifdef _DEBUG
 	FloatingTypeGPU lowerBounds[3] = { xMin, yMin, zMin };
 	FloatingTypeGPU upperBounds[3] = { xMax, yMax, zMax };
 
@@ -28,6 +29,7 @@ void GAIA::solveBoxBoundaryConstraintOnCPU(PBDTetMeshFEMGPU* pTetMeshGPU, Floati
 		{
 			solveBoxBoundaryContraintForVertex(pTetMeshGPU, pTetMeshGPU->vertPos + VERTEX_BUFFER_STRIDE * iVert, iVert, lowerBounds, upperBounds, boundaryFritionStatic, boundaryFritionDynamic);
 		});
+#endif
 }
 
 __host__ __device__ void GAIA::solveBoxBoundaryContraintForVertex(PBDTetMeshFEMGPU* pTetMeshGPU, FloatingTypeGPU* v,

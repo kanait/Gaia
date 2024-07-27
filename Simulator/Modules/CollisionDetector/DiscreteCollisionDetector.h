@@ -99,12 +99,12 @@ namespace GAIA {
     // vId is a tet vertex id, but it must be a surface vertex, i.e., pTM->
     bool checkVertexFeasibleRegion(embree::Vec3fa& p, TetMeshFEM* pTM, int32_t vId, float feasibleRegionEpsilon);
 
-    inline embree::Vec3fa GAIA::loadVertexPos(TetMeshFEM* pTM, int32_t vId)
+    inline embree::Vec3fa loadVertexPos(TetMeshFEM* pTM, int32_t vId)
     {
         return embree::Vec3fa::loadu(pTM->mVertPos.col(vId).data());
     }
 
-    inline embree::Vec3fa GAIA::faceNormal(TetMeshFEM* pTM, int32_t faceId)
+    inline embree::Vec3fa faceNormal(TetMeshFEM* pTM, int32_t faceId)
     {
         embree::Vec3fa a = loadVertexPos(pTM, pTM->surfaceFacesTetMeshVIds()(0, faceId)),
             b = loadVertexPos(pTM, pTM->surfaceFacesTetMeshVIds()(1, faceId)),

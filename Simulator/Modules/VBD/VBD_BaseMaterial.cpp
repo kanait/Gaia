@@ -137,11 +137,12 @@ void VBDBaseTetMesh::forwardStepSimplecticEuler()
 	evaluateInternalForce();
 	evaluateExternalForce();
 
-	cpu_parallel_for(0, numVertices(), [&](int iV)
-		{
+	//cpu_parallel_for(0, numVertices(), [&](int iV) {
+        auto forwardStepHandler = [&](int iV) {
 			mVelocity.col(iV) = mVelocitiesPrev.col(iV) + dt * (vertexExternalForces.col(iV) + vertexInternalForces.col(iV))
 				* vertexInvMass(iV);
 
 			mVertPos.col(iV) += mVelocity.col(iV) * dt;
-		});
+		};
+        cpu_parallel_for(0, numVertices(), forwardStepHandler);
 }

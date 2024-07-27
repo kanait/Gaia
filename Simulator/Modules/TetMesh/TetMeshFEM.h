@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Eigen/core"
+#include "Eigen/Core"
 #include "Eigen/StdVector"
 #include <array>
 #include <vector>
@@ -197,7 +197,8 @@ namespace GAIA {
 
 		IdType* getSurfaceFVIdsInTetMeshVIds(IdType surfaceFId);
 
-		Vec4BlockI GAIA::TetMeshFEM::tet(size_t i);
+	  //		Vec4BlockI GAIA::TetMeshFEM::tet(size_t i);
+	  	Vec4BlockI tet(size_t i);
 
 		bool tetrahedralTraverseTo(const Vec3& rayOrigin, const Vec3& rayDir, const FloatingType maxTraversalDis, int32_t startTetId, int32_t startFaceId,
 			int32_t targetTetId, FloatingType rayTriIntersectionEpsilon, TraverseStatistics& statistics);
@@ -212,13 +213,15 @@ namespace GAIA {
 		int exitFaceSelection(Eigen::Matrix<FloatingType, 2, 4>& ptsProj2D, Eigen::Vector4i& possibleExitFace,
 			FloatingType rayTriIntersectionEpsilon);
 
-		int TetMeshFEM::checkExitFaceForward(const Vec3& rayDir, int32_t tetId, int32_t incomingFaceIdCurTet,
+          //		int TetMeshFEM::checkExitFaceForward(const Vec3& rayDir, int32_t tetId, int32_t incomingFaceIdCurTet,
+		int checkExitFaceForward(const Vec3& rayDir, int32_t tetId, int32_t incomingFaceIdCurTet,
 			Eigen::Vector4i& possibleExitFace);
 
 		void projectTo2DCoordinates(Eigen::Matrix<FloatingType, 2, 4>& ptsProj2D, int32_t tetId, int32_t incomingFaceId,
 			const Eigen::Matrix<FloatingType, 2, 3>& axesT, const Vec3& origin);
 
-		inline void TetMeshFEM::copyRepermutedVerts(Eigen::Matrix<FloatingType, 3, 4>& ptsPermuted3D,
+          //		inline void TetMeshFEM::copyRepermutedVerts(Eigen::Matrix<FloatingType, 3, 4>& ptsPermuted3D,
+		inline void copyRepermutedVerts(Eigen::Matrix<FloatingType, 3, 4>& ptsPermuted3D,
 			int32_t tetId, int32_t incomingFaceId);
 
 		template <typename Derived2x1>
@@ -336,7 +339,7 @@ namespace GAIA {
 		auto v1 = mVertPos.block<3, 1>(0, tetVIds()(0, tId));
 		for (size_t iCol = 0; iCol < 3; iCol++)
 		{
-			Ds.block<3, 1>(0, iCol) = mVertPos.block<3, 1>(0, tetVIds()(iCol + 1, tId)) - v1;
+			Ds.template block<3, 1>(0, iCol) = mVertPos.block<3, 1>(0, tetVIds()(iCol + 1, tId)) - v1;
 		}
 	}
 

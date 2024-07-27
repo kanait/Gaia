@@ -221,7 +221,8 @@ namespace GAIA {
 		void* pDetector = nullptr;
 	};
 
-	inline ClosestPointOnPrimitiveType GAIA::getClosestPointOnPrimitiveType(const ClosestPointOnTriangleType& type)
+  //	inline ClosestPointOnPrimitiveType GAIA::getClosestPointOnPrimitiveType(const ClosestPointOnTriangleType& type)
+	inline ClosestPointOnPrimitiveType getClosestPointOnPrimitiveType(const ClosestPointOnTriangleType& type)
 	{
 		switch (type)
 		{

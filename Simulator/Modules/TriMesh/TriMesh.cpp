@@ -2,7 +2,7 @@
 #include "CuMatrix/Geometry/Geometry.h"
 #include <MeshFrame/Parser/strutil.h>
 #include <MeshFrame/Utility/IO.h>
-#include <MeshFrame/Utility/STR.h>
+#include <MeshFrame/Utility/Str.h>
 #include "../Parallelization/CPUParallelization.h"
 
 #include <MeshFrame/TriMesh/MeshStatic.h>
@@ -114,9 +114,11 @@ void GAIA::TriMeshFEM::applyRotationScalingTranslation()
 
 void GAIA::TriMeshFEM::evaluateFaceNormals(bool normalize)
 {
-	cpu_parallel_for(0, numFaces(), [&](int iFace) {
+  //	cpu_parallel_for(0, numFaces(), [&](int iFace) {
+  auto lambdaFunc = [&](int iFace) {
 		faceNormals.col(iFace) = computeNormal(iFace, normalize);
-		});
+		};
+  cpu_parallel_for(0, numFaces(), lambdaFunc);
 }
 
 void GAIA::TriMeshFEM::computeTopology()

@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "PBDTetMeshFEMGPU.h"
+#include "../PBD/PBDTetMeshFEMGPU.h"
 
 namespace GAIA {
 	template <class Func>

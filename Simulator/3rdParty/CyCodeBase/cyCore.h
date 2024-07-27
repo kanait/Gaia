@@ -52,6 +52,9 @@
 #include <type_traits>
 #include <limits>
 
+#define CY_NO_INTRIN_H 1
+#define CY_NO_EMMINTRIN_H 1
+
 #if !defined(CY_NO_INTRIN_H) && !defined(CY_NO_EMMINTRIN_H)
 # include <intrin.h>
 #endif

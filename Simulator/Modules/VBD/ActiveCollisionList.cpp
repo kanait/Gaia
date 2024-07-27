@@ -24,14 +24,16 @@ void GAIA::ActiveCollisionList::initializeParallelGroup(const std::vector<std::v
 void GAIA::ActiveCollisionList::clear()
 {
 	activeCollisions.clear();
-	cpu_parallel_for(0, vertexCollisionRelations.size(), [&](int iMesh) {
+        //	cpu_parallel_for(0, vertexCollisionRelations.size(), [&](int iMesh) {
+        auto lambdaFunc = [&](int iMesh) {
 		std::vector<CollisionRelationList>& meshColRelationList = vertexCollisionRelations[iMesh];
 		for (size_t iVert = 0; iVert < meshColRelationList.size(); iVert++)
 		{
 			vertexCollisionRelations[iMesh][iVert].clear();
 		}
 
-		});
+		};
+        cpu_parallel_for(0, vertexCollisionRelations.size(), lambdaFunc);
 
 	for (size_t iGroup = 0; iGroup < numActiveCollisionsEachParallelGroup.size(); iGroup++)
 	{

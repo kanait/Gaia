@@ -108,12 +108,12 @@ namespace GAIA {
 			return objectParamsList.getObjectParam(iObj);
 		}
 
-		inline GAIA::PBDPhysicParameters& GAIA::PBDPhysics::physicsParams()
+		inline GAIA::PBDPhysicParameters& physicsParams()
 		{
 			return physicsAllParams.physicsParams;
 		}
 
-        inline GAIA::CollisionDetectionParamters& GAIA::PBDPhysics::collisionParams()
+        inline GAIA::CollisionDetectionParamters& collisionParams()
         {
             return physicsAllParams.collisionParams;
         }

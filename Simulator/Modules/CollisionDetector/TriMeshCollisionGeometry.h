@@ -42,7 +42,7 @@ namespace GAIA {
         return orientedArea;
     }
 
-    inline embree::Vec3fa GAIA::faceNormal(const TriMeshFEM* pMesh, int32_t faceId)
+    inline embree::Vec3fa faceNormal(const TriMeshFEM* pMesh, int32_t faceId)
     {
         embree::Vec3fa normal = faceOrientedArea(pMesh, faceId);
         normal = embree::normalize(normal);

@@ -228,16 +228,19 @@ void GAIA::solveVolumeConstraintsAggregatedGPU(int32_t numThreads, cudaStream_t 
 
 void GAIA::solveSpringConstraintsCPU(int32_t* pEdgeParallelizationGroup, int32_t edgeParallelizationGroupSize, PBDTetMeshFEMGPUMassSpring tetMeshGPU)
 {
+#ifdef _DEBUG
 	cpu_parallel_for(0, edgeParallelizationGroupSize, [&](int iEdge)
 		{
 			int32_t edgeId = pEdgeParallelizationGroup[iEdge];
 			solveMaterialForOneEdge_MassSpring(edgeId, tetMeshGPU);
 		});
+#endif
 }
 
 void GAIA::solveVolumeConstraintsCPU(const int32_t* pTetParallelizationGroup, int32_t tetParallelizationGroupSize,
 	PBDTetMeshFEMGPUMassSpring tetMeshGPU)
 {
+#ifdef _DEBUG
 	cpu_parallel_for(0, tetParallelizationGroupSize, [&](int iTet)
 		{
 			int32_t tetId = pTetParallelizationGroup[iTet];
@@ -266,5 +269,6 @@ void GAIA::solveVolumeConstraintsCPU(const int32_t* pTetParallelizationGroup, in
 			FloatingTypeGPU CVol = GAIA::solveVolConstraint(tetId, v0, v1, v2, v3, gradVol, tetMeshGPU.DmInvs);
 			GAIA::applyToInfiniteStiffness(tetMeshGPU.vertPos, tetMeshGPU.vertexInvMass, tetId, tetVIds, CVol, gradVol);
 		});
+#endif
 }
 

@@ -241,11 +241,13 @@ bool GAIA::PBDPhysics::initializeGPU()
 	pDCD->initialize(tMeshPtrsBase);
 	pCCD->initialize(tMeshPtrsBase);
 
+#if 0
 	if (physicsAllParams.collisionParams.allowVolumetricCollision)
 	{
 		pVolCD = std::make_shared<VolumetricCollisionDetector>(physicsAllParams.collisionParams.volCollisionParams);
 		pVolCD->initialize(tMeshPtrsBase);
 	}
+#endif
 
 	// initialize GPUS
 	cudaStreams.resize(tMeshes.size());
@@ -289,12 +291,12 @@ void GAIA::PBDPhysics::simulateGPU()
 		updateWorldBox();
 	}
 	setUpOutputFolders(outputFolder);
-	std::cout 
+	std::cout
 		<< "----------------------------------------------------\n"
 		<< "Output folder is: " << outputFolder << std::endl;
 
 	writeOutputs(outputFolder, frameId);
-	std::cout 
+	std::cout
 		<< "----------------------------------------------------\n"
 		<< "Starting Sims\n"
 		<< "----------------------------------------------------"
@@ -562,7 +564,7 @@ void GAIA::PBDPhysics::materialBoundarySolveGPU()
 			if (iParallelizationGroup < tMeshes[iMesh]->numAllParallelizationGroups())
 			{
 				//printf("---------------------------\nparallelizationGroup:\n", iParallelizationGroup);
-				tMeshes[iMesh]->solveMaterialConstraintGPU_ParallelizationGroup(iParallelizationGroup, 
+				tMeshes[iMesh]->solveMaterialConstraintGPU_ParallelizationGroup(iParallelizationGroup,
 					physicsParams().numThreadsMaterialSolve, cudaStreams[iMesh]);
 				allDone = false;
 
@@ -732,7 +734,7 @@ void GAIA::PBDPhysics::initialCollisionsDetection()
 
 			//initialPenetratedVertIds.resize(pTM->numSurfaceVerts());
 			//for (size_t iV = 0; iV < pTM->numSurfaceVerts(); ++iV) {
-			//	initialPenetratedVertIds[iV] = 
+			//	initialPenetratedVertIds[iV] =
 			//}
 		}
 
@@ -748,8 +750,8 @@ void GAIA::PBDPhysics::initialCollisionsDetection()
 		std::vector<bool> vertsHasPenetrated(pTM->surfaceVIds().size());
 		std::vector<CollisionDetectionResult>& dcdResults = dcdResultsAll[iMesh];
 
-		cpu_parallel_for(0, pTM->surfaceVIds().size(), [&](int iSurfaceV)
-			{
+		// cpu_parallel_for(0, pTM->surfaceVIds().size(), [&](int iSurfaceV) {
+                auto initialCollisionsDetectionHandler = [&](int iSurfaceV) {
 				int32_t surfaceVId = pTM->surfaceVIds()(iSurfaceV);
 				pDCD->vertexCollisionDetection(surfaceVId, iMesh, &dcdResults[iSurfaceV]);
 
@@ -761,7 +763,8 @@ void GAIA::PBDPhysics::initialCollisionsDetection()
 				{
 					vertsHasPenetrated[iSurfaceV] = false;
 				}
-			});
+			};
+                cpu_parallel_for(0, pTM->surfaceVIds().size(), initialCollisionsDetectionHandler);
 
 		for (size_t iV = 0; iV < vertsHasPenetrated.size(); ++iV) {
 			if (vertsHasPenetrated[iV])
@@ -783,7 +786,7 @@ void GAIA::PBDPhysics::updateDCD_CPU(bool rebuild)
 	TICK(timeCsmpUpdatingBVHDCD);
 	int numActiveCCD = positiveCollisionDetectionResults.size();
 
-	RTCBuildQuality surfaceSceneQuality 
+	RTCBuildQuality surfaceSceneQuality
 		= !(frameId % physicsParams().dcdSurfaceSceneBVHRebuildSteps) && (substep == 0) ? RTC_BUILD_QUALITY_LOW : RTC_BUILD_QUALITY_REFIT;
 	if (rebuild)
 	{
@@ -803,14 +806,15 @@ void GAIA::PBDPhysics::updateDCD_CPU(bool rebuild)
 			std::vector<CollisionDetectionResult>& dcdResults = dcdResultsAll[iMesh];
 
 			TICK(timeCsmpColDetectDCD);
-			cpu_parallel_for(0, pTM->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+			// cpu_parallel_for(0, pTM->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto updateDCD_CPUHandler = [&](int iSurfaceV) {
 					int32_t surfaceVId = pTM->surfaceVIds()(iSurfaceV);
 					if (pTM->DCDEnabled(surfaceVId))
 					{
 						pDCD->vertexCollisionDetection(surfaceVId, iMesh, &dcdResults[iSurfaceV]);
 					}
-				});
+				};
+                        cpu_parallel_for(0, pTM->surfaceVIds().size(), updateDCD_CPUHandler);
 			TOCK_STRUCT(timeStatistics, timeCsmpColDetectDCD);
 
 			// recorded the surface vert ids that are tested positive for collision
@@ -824,11 +828,12 @@ void GAIA::PBDPhysics::updateDCD_CPU(bool rebuild)
 			}
 
 			TICK(timeCsmpShortestPathSearchDCD);
-			cpu_parallel_for(0, dcdResultsPositiveVId.size(), [&](int iIntersection)
-				{
+			// cpu_parallel_for(0, dcdResultsPositiveVId.size(), [&](int iIntersection) {
+                        auto updateDCD_CPUHandler2 = [&](int iIntersection) {
 					ClosestPointQueryResult closestPtResult;
 					pDCD->closestPointQuery(&dcdResults[dcdResultsPositiveVId[iIntersection]], &closestPtResult);
-				});
+				};
+                        cpu_parallel_for(0, dcdResultsPositiveVId.size(), updateDCD_CPUHandler2);
 			TOCK_STRUCT(timeStatistics, timeCsmpShortestPathSearchDCD);
 
 			for (int iIntersection = 0; iIntersection < dcdResultsPositiveVId.size(); iIntersection++)
@@ -849,14 +854,15 @@ void GAIA::PBDPhysics::updateDCD_CPU(bool rebuild)
 			std::vector<CollisionDetectionResult> dcdResults(initialPenetratedVertIds[iMesh].size());
 
 			TICK(timeCsmpColDetectDCD);
-			cpu_parallel_for(0, dcdResults.size(), [&](int iSurfaceV)
-				{
+			// cpu_parallel_for(0, dcdResults.size(), [&](int iSurfaceV) {
+                        auto updateDCD_CPUHandler3 = [&](int iSurfaceV) {
 					int32_t surfaceVId = pTM->surfaceVIds()(initialPenetratedVertIds[iMesh][iSurfaceV]);
 					if (pTM->DCDEnabled(surfaceVId))
 					{
 						pDCD->vertexCollisionDetection(surfaceVId, iMesh, &dcdResults[iSurfaceV]);
 					}
-				});
+				};
+                        cpu_parallel_for(0, dcdResults.size(), updateDCD_CPUHandler3);
 			TOCK_STRUCT(timeStatistics, timeCsmpColDetectDCD);
 
 			// recorded the surface vert ids that are tested positive for collision
@@ -870,11 +876,12 @@ void GAIA::PBDPhysics::updateDCD_CPU(bool rebuild)
 			}
 
 			TICK(timeCsmpShortestPathSearchDCD);
-			cpu_parallel_for(0, dcdResultsPositiveVId.size(), [&](int iIntersection)
-				{
-					ClosestPointQueryResult closestPtResult;
+			// cpu_parallel_for(0, dcdResultsPositiveVId.size(), [&](int iIntersection) {
+                        auto updateDCD_CPUHandler4 = [&](int iIntersection) {
+                        ClosestPointQueryResult closestPtResult;
 					pDCD->closestPointQuery(&dcdResults[dcdResultsPositiveVId[iIntersection]], &closestPtResult);
-				});
+                           };
+                        cpu_parallel_for(0, dcdResultsPositiveVId.size(), updateDCD_CPUHandler4);
 			TOCK_STRUCT(timeStatistics, timeCsmpShortestPathSearchDCD);
 
 			for (int iIntersection = 0; iIntersection < dcdResultsPositiveVId.size(); iIntersection++)
@@ -924,15 +931,16 @@ void GAIA::PBDPhysics::updateCCD_CPU(bool rebuild)
 		TetMeshFEM* pTM = tMeshes[iMesh].get();
 
 		TICK(timeCsmpColDetectCCD);
-		cpu_parallel_for(0, initialPenetrationFreeVertIds[iMesh].size(), [&](int iSurfaceV)
-			{
+		// cpu_parallel_for(0, initialPenetrationFreeVertIds[iMesh].size(), [&](int iSurfaceV) {
+                auto updateCCD_CPUHandler = [&](int iSurfaceV) {
 				int32_t surfaceVIdSurfaceMesh = initialPenetrationFreeVertIds[iMesh][iSurfaceV];
 				int32_t surfaceVId = pTM->surfaceVIds()(surfaceVIdSurfaceMesh);
 				if (pTM->CCDEnabled(surfaceVId))
 				{
 					pCCD->vertexContinuousCollisionDetection(surfaceVId, iMesh, &ccdResultsAll[iMesh][surfaceVIdSurfaceMesh]);
 				}
-			});
+			};
+                cpu_parallel_for(0, initialPenetrationFreeVertIds[iMesh].size(), updateCCD_CPUHandler);
 
 		for (int iSurfaceV = 0; iSurfaceV < initialPenetrationFreeVertIds[iMesh].size(); iSurfaceV++)
 		{
@@ -995,8 +1003,8 @@ void GAIA::PBDPhysics::updateVelocities()
 		FloatingType maxVelocityMagnitude = getObjectParam(iMesh).maxVelocityMagnitude;
 
 		//for (size_t iVert = 0; iVert < tMeshes[iMesh]->numVertices(); iVert++)
-		cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), [&](int iVert)
-			{
+		// cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), [&](int iVert) {
+                auto updateVelocitiesHandler = [&](int iVert) {
 				FloatingType vMag = velMags(iVert);
 
 				if (getObjectParam(iMesh).hasNoGravZone &&
@@ -1019,7 +1027,8 @@ void GAIA::PBDPhysics::updateVelocities()
 				{
 					tMeshes[iMesh]->mVelocity.col(iVert) *= 0.f;
 				}
-		});
+		};
+                cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), updateVelocitiesHandler);
 
 	}
 }
@@ -1096,7 +1105,7 @@ void GAIA::PBDPhysics::solveCollisionConstraintsOneVertCPU(int32_t curVertID, in
 	Vec3I closestFaceVIds = pIntersectedTM->surfaceFacesTetMeshVIds().col(closestFaceId);
 
 	if (
-		//(iIter == 0 || !physicsParams().doCollDetectionOnlyForFirstIteration) 
+		//(iIter == 0 || !physicsParams().doCollDetectionOnlyForFirstIteration)
 		//&& !colResult.fromCCD
 		// collision solution may influence the shape of the mesh thus the closest point information maybe inaccurate even for the first iteration
 		collisionParams().restPoseCloestPoint
@@ -1281,8 +1290,8 @@ void GAIA::PBDPhysics::applyCollisionConstraintsCPU(const Vec3I& closestFaceVIds
 	}
 
 	Vec3 diffV = diff * pCurTM->vertexInvMass(curVertId) / (pCurTM->vertexInvMass(curVertId)
-		+ pIntersectedTM->vertexInvMass(closestFaceVIds[0]) 
-		+ pIntersectedTM->vertexInvMass(closestFaceVIds[1]) 
+		+ pIntersectedTM->vertexInvMass(closestFaceVIds[0])
+		+ pIntersectedTM->vertexInvMass(closestFaceVIds[1])
 		+ pIntersectedTM->vertexInvMass(closestFaceVIds[2]));
 	pCurTM->vertex(curVertId) -= diff ;
 
@@ -1334,7 +1343,7 @@ void GAIA::PBDPhysics::writeOutputs(std::string outFolder, int frameId)
 	if (physicsAllParams.physicsParams.outputExt == "bin")
 	{
 		if (frameId == 0)
-			// 
+			//
 			//  template
 		{
 			std::string templateMeshOutOutPath = outFolder + "/TemplateMesh";
@@ -1443,9 +1452,11 @@ void GAIA::PBDPhysics::setUpOutputFolders(std::string outFolder)
 
 void GAIA::PBDPhysics::applyInitialGuesses()
 {
-	cpu_parallel_for(0, tMeshes.size(), [&] (int iMesh) {
+	// cpu_parallel_for(0, tMeshes.size(), [&] (int iMesh) {
+  auto applyInitialGuessesHandler = [&](int iMesh) {
 		tMeshes[iMesh]->applyInitialGuess();
-		});
+		};
+  cpu_parallel_for(0, tMeshes.size(), applyInitialGuessesHandler);
 }
 
 void GAIA::PBDPhysics::evaluateObjectActiveness()
@@ -1489,7 +1500,8 @@ void GAIA::PBDPhysics::solveInvertedTets()
 	{
 		PBDTetMeshFEM* pTM = tMeshes[iMesh].get();
 
-		cpu_parallel_for(0, pTM->numTets(), [&](int iTet) {
+		// cpu_parallel_for(0, pTM->numTets(), [&](int iTet) {
+                auto solveInvertedTetsHandler = [&](int iTet) {
 			FloatingType v = CuMatrix::tetOrientedVolume(pTM->mVertPos.data(), pTM->tetVIds().col(iTet).data());
 			if (v <= 0)
 			{
@@ -1499,7 +1511,8 @@ void GAIA::PBDPhysics::solveInvertedTets()
 			{
 				pTM->tetsInvertedSign[iTet] = false;
 			}
-			});
+			};
+                cpu_parallel_for(0, pTM->numTets(), solveInvertedTetsHandler);
 
 		//int numInverted = 0;
 		//for (int iTet = 0; iTet < pTM->numTets(); iTet++)
@@ -1508,7 +1521,7 @@ void GAIA::PBDPhysics::solveInvertedTets()
 		//		++numInverted;
 		//	}
 		//}
-		//std::cout << "num inverted before solving: " << numInverted << std::endl; 
+		//std::cout << "num inverted before solving: " << numInverted << std::endl;
 		if (physicsParams().solveInvertedTets)
 		{
 			// -- v2
@@ -1610,8 +1623,8 @@ void GAIA::PBDPhysics::solveInvertedTets()
 		//std::fill(pTM->verticesInvertedSign.begin(), pTM->verticesInvertedSign.end(), false);
 		pTM->verticesInvertedSign.fill(false);
 		//for (int iTet = 0; iTet < pTM->numTets(); iTet++)
-		cpu_parallel_for(0, pTM->numTets(), [&](int iTet)
-			{
+		// cpu_parallel_for(0, pTM->numTets(), [&](int iTet) {
+                auto solveInvertedTetsHandler2 = [&](int iTet) {
 				if (pTM->tetsInvertedSign[iTet])
 				{
 					for (size_t iV = 0; iV < 4; iV++)
@@ -1619,7 +1632,8 @@ void GAIA::PBDPhysics::solveInvertedTets()
 						pTM->verticesInvertedSign[pTM->getTVId(iTet, iV)] = true;
 					}
 				}
-			});
+			};
+                cpu_parallel_for(0, pTM->numTets(), solveInvertedTetsHandler2);
 	}
 }
 
@@ -1744,18 +1758,22 @@ bool GAIA::PBDPhysicsAllParameters::fromJson(nlohmann::json& physicsJsonParams)
 {
 	physicsParams.fromJson(physicsJsonParams["PhysicsParams"]);
 	collisionParams.fromJson(physicsJsonParams["CollisionParams"]);
+#if 0
 	if (collisionParams.allowVolumetricCollision) {
 		collisionParams.volCollisionParams.fromJson(physicsJsonParams["VolCollisionParams"]);
 	}
+#endif
 	return true;
 }
 
 bool GAIA::PBDPhysicsAllParameters::toJson(nlohmann::json& physicsJsonParams)
 {
 	physicsParams.toJson(physicsJsonParams["PhysicsParams"]);
-	collisionParams.toJson(physicsJsonParams["CollisionParams"]); 
+	collisionParams.toJson(physicsJsonParams["CollisionParams"]);
+#if 0
 	if (collisionParams.allowVolumetricCollision) {
 		collisionParams.volCollisionParams.toJson(physicsJsonParams["VolCollisionParams"]);
 	}
+#endif
 	return true;
 }

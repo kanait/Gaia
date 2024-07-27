@@ -15,25 +15,29 @@ void GAIA::VBDTetMeshNeoHookean::solverIteration()
 	{
 		const std::vector<int32_t>& coloring = verticesColoringCategories()[iColor];
 		const size_t sizeColoring = coloring.size();
-		cpu_parallel_for(0, sizeColoring, [&](int iV) {
+		// cpu_parallel_for(0, sizeColoring, [&](int iV) {
+                auto solverIterationHandler = [&](int iV) {
 			int vId = coloring[iV];
 			if (!fixedMask[vId])
 			{
 				VBDStep(vId);
 			}
-			});
+			};
+                cpu_parallel_for(0, sizeColoring, solverIterationHandler);
 	}
 
 }
 
 void GAIA::VBDTetMeshNeoHookean::evaluateInternalForce()
 {
-	cpu_parallel_for(0, numVertices(), [&](int iV) {
+	// cpu_parallel_for(0, numVertices(), [&](int iV) {
+  auto evaluateInternalForceHandler = [&](int iV) {
 		Vec3 internalForce;
 		internalForce.setZero();
 		accumlateMaterialForce(iV, internalForce);
 		vertexInternalForces.col(iV) = internalForce;
-		});
+		};
+  cpu_parallel_for(0, numVertices(), evaluateInternalForceHandler);
 }
 
 void GAIA::VBDTetMeshNeoHookean::VBDStep(int iV)
@@ -155,9 +159,16 @@ template<typename T>
 inline void assembleTetForceAndHessian(const Eigen::Vector<T, 9>& dE_dF, const Eigen::Matrix<T, 9, 9>& d2E_dF, const Eigen::Vector<T, 12>& m,
 	Eigen::Vector<T, 12>& force, Eigen::Matrix<T, 12, 12>& h)
 {
-	Eigen::Map<const Eigen::Matrix3<T>> dedf(dE_dF.data());
+  //	Eigen::Map<const Eigen::Matrix3<T>> dedf(dE_dF.data());
+  // Is it correctly modified?
+  Eigen::Matrix<T, 3, 3> dedf;
+  dedf.row(0) = dE_dF.template segment<3>(0).transpose();
+  dedf.row(1) = dE_dF.template segment<3>(3).transpose();
+  dedf.row(2) = dE_dF.template segment<3>(6).transpose();
+    
 	for (int i = 0; i < 4; ++i) {
-		force.segment<3>(i * 3) = -(dedf * m.segment<3>(i * 3));
+          // Is it correctly modified?
+          force.template segment<3>(i * 3) = -(dedf * m.template segment<3>(i * 3));
 	}
 
 	for (int i = 0; i < 4; ++i) {
@@ -174,9 +185,14 @@ inline void assembleTetForceAndHessian(const Eigen::Vector<T, 9>& dE_dF, const E
 			HL.row(1) = d2E_dF.row(1) * mi1 + d2E_dF.row(4) * mi2 + d2E_dF.row(7) * mi3;
 			HL.row(2) = d2E_dF.row(2) * mi1 + d2E_dF.row(5) * mi2 + d2E_dF.row(8) * mi3;
 
-			h.block<3, 1>(3 * i, 3 * j) = HL.col(0) * mj1 + HL.col(3) * mj2 + HL.col(6) * mj3;
-			h.block<3, 1>(3 * i, 3 * j + 1) = HL.col(1) * mj1 + HL.col(4) * mj2 + HL.col(7) * mj3;
-			h.block<3, 1>(3 * i, 3 * j + 2) = HL.col(2) * mj1 + HL.col(5) * mj2 + HL.col(8) * mj3;
+			// h.block<3, 1>(3 * i, 3 * j) = HL.col(0) * mj1 + HL.col(3) * mj2 + HL.col(6) * mj3;
+			// h.block<3, 1>(3 * i, 3 * j + 1) = HL.col(1) * mj1 + HL.col(4) * mj2 + HL.col(7) * mj3;
+			// h.block<3, 1>(3 * i, 3 * j + 2) = HL.col(2) * mj1 + HL.col(5) * mj2 + HL.col(8) * mj3;
+                        // Is it correctly modified?
+                        h.template block<3, 1>(3 * i, 3 * j) = HL.template block<3, 1>(0, 0) * mj1 + HL.template block<3, 1>(0, 3) * mj2 + HL.template block<3, 1>(0, 6) * mj3;
+                        h.template block<3, 1>(3 * i, 3 * j + 1) = HL.template block<3, 1>(1, 0) * mj1 + HL.template block<3, 1>(1, 3) * mj2 + HL.template block<3, 1>(1, 6) * mj3;
+                        h.template block<3, 1>(3 * i, 3 * j + 2) = HL.template block<3, 1>(2, 0) * mj1 + HL.template block<3, 1>(2, 3) * mj2 + HL.template block<3, 1>(2, 6) * mj3;
+        
 		}
 
 	}

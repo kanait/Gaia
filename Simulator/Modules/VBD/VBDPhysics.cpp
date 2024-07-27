@@ -278,8 +278,8 @@ void GAIA::VBDPhysics::initialize()
 	tetParallelGroups.resize(vertexParallelGroups.size());
 	//for (int iGroup = 0; iGroup < vertexParallelGroups.size(); iGroup++)
 	std::mutex printMutex;
-	cpu_parallel_for(0, vertexParallelGroups.size(), [&](int iGroup)
-		{
+	//cpu_parallel_for(0, vertexParallelGroups.size(), [&](int iGroup) {
+        auto lambdaFunc = [&](int iGroup) {
 			const auto& currentVertexColorGroup = vertexParallelGroups[iGroup];
 			auto& currentTetColorGroup = tetParallelGroups[iGroup];
 			currentTetColorGroup.reserve(currentVertexColorGroup.size());
@@ -406,7 +406,8 @@ void GAIA::VBDPhysics::initialize()
 				std::lock_guard<std::mutex> printLockGuard(printMutex);
 				std::cout << "size of tet parallel group " << iGroup << ": " << currentTetColorGroup.size() / 4 << "\n";
 			}
-		});
+		};
+        cpu_parallel_for(0, vertexParallelGroups.size(), lambdaFunc);
 
 
 	activeColllisionList.initialize(tMeshes, vertexParallelGroups, physicsParams().activeCollisionListPreAllocationRatio);
@@ -847,13 +848,15 @@ void GAIA::VBDPhysics::runStepGPU()
 		dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                //		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                auto lambdaFunc1 = [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
 				tMeshes[iMesh]->applyInitialStep();
 			}
-			});
+			};
+                cpu_parallel_for(0, numTetMeshes(), lambdaFunc1);
 		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
 		ccd();
 
@@ -1183,13 +1186,15 @@ void GAIA::VBDPhysics::runStepGPU_GD()
 		//dcd();
 
 		TICK(timeCsmpInitialStep);
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                //		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                auto lambdaFunc2 = [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
 				tMeshes[iMesh]->applyInitialStep();
 			}
-			});
+			};
+                cpu_parallel_for(0, numTetMeshes(), lambdaFunc2);
 		TOCK_STRUCT(timeStatistics(), timeCsmpInitialStep);
 		//ccd();
 
@@ -1442,13 +1447,15 @@ void GAIA::VBDPhysics::runStepNewton()
 
 		// dcd();
 
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                //		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                auto lambdaFunc3 = [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
 				tMeshes[iMesh]->applyInitialStep();
 			}
-			});
+			};
+                cpu_parallel_for(0, numTetMeshes(), lambdaFunc3);
 		applyDeformers();
 
 		// ccd();
@@ -1588,13 +1595,15 @@ void GAIA::VBDPhysics::runStep_serialCollisionHandling()
 
 		dcd();
 
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+		// cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                auto lambdaFunc4 = [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
 				tMeshes[iMesh]->applyInitialStep();
 			}
-			});
+			};
+                cpu_parallel_for(0, numTetMeshes(), lambdaFunc4);
 		applyDeformers();
 
 		ccd();
@@ -1611,7 +1620,8 @@ void GAIA::VBDPhysics::runStep_serialCollisionHandling()
 				const std::vector<IdType>& parallelGroup = vertexParallelGroups[iGroup];
 
 				size_t numVertices = parallelGroup.size() / 2;
-				cpu_parallel_for(0, numVertices, [&](int iV) {
+				//cpu_parallel_for(0, numVertices, [&](int iV) {
+                                auto lambdaFunc5 = [&](int iV) {
 					IdType iMesh = parallelGroup[iV * 2];
 					int vId = parallelGroup[2 * iV + 1];
 
@@ -1622,7 +1632,8 @@ void GAIA::VBDPhysics::runStep_serialCollisionHandling()
 						//pMesh->VBDStep(vId);
 						VBDStepWithCollision(pMesh, iMesh, vId, apply_friction);
 					}
-					});
+					};
+                                cpu_parallel_for(0, numVertices, lambdaFunc5);
 			}
 		} // iteration
 		TOCK_STRUCT(timeStatistics(), timeCsmpMaterialSolve);
@@ -1642,13 +1653,15 @@ void GAIA::VBDPhysics::runStep_hybridCollisionHandling()
 
 		dcd();
 
-		cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+		//cpu_parallel_for(0, numTetMeshes(), [&](int iMesh) {
+                auto lambdaFunc6 = [&](int iMesh) {
 			if (tMeshes[iMesh]->activeForMaterialSolve)
 			{
 				tMeshes[iMesh]->evaluateExternalForce();
 				tMeshes[iMesh]->applyInitialStep();
 			}
-			});
+			};
+                cpu_parallel_for(0, numTetMeshes(), lambdaFunc6);
 		applyDeformers();
 
 		ccd();
@@ -1672,14 +1685,17 @@ void GAIA::VBDPhysics::runStep_hybridCollisionHandling()
 				size_t numVertices = parallelGroup.size() / 2;
 				size_t numCollisionParallelGroup = activeColllisionList.numActiveCollisionsEachParallelGroup[iGroup];
 				// update collision info for parallel group
-				cpu_parallel_for(0, numCollisionParallelGroup, [&](int iCollision) {
+				// cpu_parallel_for(0, numCollisionParallelGroup, [&](int iCollision) {
+                                auto collisionHandler = [&](int iCollision) {
 					IdType iMesh = activeColllisionList.activeCollisionsEachParallelGroup[iGroup][iCollision * 2];
 					int vId = activeColllisionList.activeCollisionsEachParallelGroup[iGroup][2 * iCollision + 1];
 					updateCollisionInfo(getCollisionDetectionResultFromTetMeshId(iMesh, vId));
 
-					});
+					};
+                                cpu_parallel_for(0, numCollisionParallelGroup, collisionHandler);
 
-				cpu_parallel_for(0, numVertices, [&](int iV) {
+                                //				cpu_parallel_for(0, numVertices, [&](int iV) {
+                                auto vertexHandler = [&](int iV) {
 					IdType iMesh = parallelGroup[iV * 2];
 					int vId = parallelGroup[2 * iV + 1];
 
@@ -1690,7 +1706,8 @@ void GAIA::VBDPhysics::runStep_hybridCollisionHandling()
 						//pMesh->VBDStep(vId);
 						VBDStepWithCollision(pMesh, iMesh, vId, apply_friction);
 					}
-					});
+					};
+                                cpu_parallel_for(0, numVertices, vertexHandler);
 				// VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[0].get();
 				//int sum = checksum(reinterpret_cast<int*>(pMesh->mVertPos.data()), sizeof(FloatingType) / sizeof(int) * pMesh->mVertPos.size());
 				//std::cout << "substep: " << substep << "iteration: " << iteration << "iGroup: " << iGroup << ", checksum: " << sum << std::endl;
@@ -1978,8 +1995,8 @@ void GAIA::VBDPhysics::dcd()
 			}
 			pTetMesh->penetratedMask.setZero();
 
-			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+			//cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto surfaceHandler = [&](int iSurfaceV) {
 					int32_t surfaceVIdTetMesh = pTetMesh->surfaceVIds()(iSurfaceV);
 					if (pTetMesh->vertex(surfaceVIdTetMesh)[GRAVITY_AXIS] < physicsParams().collisionOffHeight
 						// && !pTetMesh->penetratedMask(surfaceVIdTetMesh))
@@ -2008,7 +2025,8 @@ void GAIA::VBDPhysics::dcd()
 						}
 					}
 
-				});
+				};
+                        cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), surfaceHandler);
 		}
 		TOCK_STRUCT(timeStatistics(), timeCsmpColDetectDCD);
 	}
@@ -2021,11 +2039,12 @@ void GAIA::VBDPhysics::dcd()
 			std::vector<VBDCollisionDetectionResult>& collisionResults = collisionResultsAll[iMesh];
 
 			TICK(timeCsmpColDetectDCD);
-			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+			//cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto clearCollisionResults = [&](int iSurfaceV) {
 					VBDCollisionDetectionResult& colResult = collisionResults[iSurfaceV];
 					colResult.clear();
-				});
+				};
+                        cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), clearCollisionResults);
 		}
 	}
 	TOCK_STRUCT(timeStatistics(), timeCsmpUpdatingCollisionInfoDCD);
@@ -2052,8 +2071,8 @@ void GAIA::VBDPhysics::intermediateDCD()
 			{
 				continue;
 			}
-			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+			// cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto intermediateDCDHandler = [&](int iSurfaceV) {
 					int32_t surfaceVIdTetMesh = pTetMesh->surfaceVIds()(iSurfaceV);
 					if (pTetMesh->penetratedMask(surfaceVIdTetMesh)
 						|| !collisionParams().allowCCD)
@@ -2067,7 +2086,8 @@ void GAIA::VBDPhysics::intermediateDCD()
 
 						}
 					}
-				});
+				};
+                        cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), intermediateDCDHandler);
 		}
 		TOCK_STRUCT(timeStatistics(), timeCsmpColDetectDCD);
 	}
@@ -2094,8 +2114,8 @@ void GAIA::VBDPhysics::ccd()
 				continue;
 			}
 			TICK(timeCsmpColDetectCCD);
-			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+                        //			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto ccdHandler = [&](int iSurfaceV) {
 					VBDCollisionDetectionResult& colResult = collisionResults[iSurfaceV];
 					// if not already penetrated use ccd
 					int32_t surfaceVIdTetMesh = pTetMesh->surfaceVIds()(iSurfaceV);
@@ -2107,8 +2127,8 @@ void GAIA::VBDPhysics::ccd()
 						pCCD->vertexContinuousCollisionDetection(surfaceVIdTetMesh, iMesh, &colResult);
 
 					}
-				}
-			);
+				};
+                        cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), ccdHandler);
 			TOCK_STRUCT(timeStatistics(), timeCsmpColDetectCCD);
 		}
 	}
@@ -2134,8 +2154,8 @@ void GAIA::VBDPhysics::intermediateCCD()
 				continue;
 			}
 			TICK(timeCsmpColDetectCCD);
-			cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV)
-				{
+			// cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), [&](int iSurfaceV) {
+                        auto intermediateCCDHandler = [&](int iSurfaceV) {
 					VBDCollisionDetectionResult& colResult = collisionResults[iSurfaceV];
 					int32_t surfaceVIdTetMesh = pTetMesh->surfaceVIds()(iSurfaceV);
 					// if not already penetrated use ccd
@@ -2147,8 +2167,8 @@ void GAIA::VBDPhysics::intermediateCCD()
 						pCCD->vertexContinuousCollisionDetection(surfaceVIdTetMesh, iMesh, &colResult);
 
 					}
-				}
-			);
+				};
+                        cpu_parallel_for(0, pTetMesh->surfaceVIds().size(), intermediateCCDHandler);
 			TOCK_STRUCT(timeStatistics(), timeCsmpColDetectCCD);
 		}
 	}
@@ -2191,14 +2211,15 @@ void GAIA::VBDPhysics::updateAllCollisionInfos()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDBaseTetMesh* pTetMesh = tMeshes[iMesh].get();
-		cpu_parallel_for(0, pTetMesh->numVertices(), [&](int iV)
-			{
+		// cpu_parallel_for(0, pTetMesh->numVertices(), [&](int iV) {
+                auto updateCollisionHandler = [&](int iV) {
 				if (pTetMesh->activeCollisionMask[iV])
 				{
 					VBDCollisionDetectionResult& colResult = getCollisionDetectionResultFromTetMeshId(iMesh, iV);
 					updateCollisionInfo(colResult);
 				}
-			});
+			};
+                cpu_parallel_for(0, pTetMesh->numVertices(), updateCollisionHandler);
 	}
 }
 
@@ -2492,11 +2513,13 @@ void GAIA::VBDPhysics::updateVelocities()
 
 		if (pMesh->activeForMaterialSolve)
 		{
-			cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+                  //			cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+                  auto updateVelocityHandler = [&](int iV) {
 				updateVelocity(pMesh, iV);
 				// applyBoudnaryFriction(pMesh, iV);
 				// applyCollisionFriction(pMesh, iMesh, iV);
-				});
+				};
+                  cpu_parallel_for(0, pMesh->numVertices(), updateVelocityHandler);
 		}
 
 	}
@@ -2526,8 +2549,8 @@ void GAIA::VBDPhysics::dampVelocities()
 			continue;
 		}
 		//for (size_t iVert = 0; iVert < tMeshes[iMesh]->numVertices(); iVert++)
-		cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), [&](int iVert)
-			{
+		//cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), [&](int iVert) {
+                auto dampVelocitiesHandler = [&](int iVert) {
 				FloatingType vMag = tMeshes[iMesh]->mVelocity.col(iVert).norm();
 				FloatingType maxVelocityMagnitude = getObjectParam(iMesh).maxVelocityMagnitude;
 
@@ -2551,7 +2574,8 @@ void GAIA::VBDPhysics::dampVelocities()
 				{
 					tMeshes[iMesh]->mVelocity.col(iVert) *= 0.f;
 				}
-			});
+			};
+                cpu_parallel_for(0, tMeshes[iMesh]->numVertices(), dampVelocitiesHandler);
 
 		for (size_t iFixedPoint = 0; iFixedPoint < tMeshes[iMesh]->pObjectParams->fixedPoints.size(); iFixedPoint++)
 		{
@@ -3467,7 +3491,8 @@ void GAIA::VBDPhysics::evaluateConvergence()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
+		// cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
+                auto evaluateConvergenceHandler = [&](int iVert) {
 			Vec3 force;
 			Mat3 hessian;
 			force = Vec3::Zero();
@@ -3477,7 +3502,8 @@ void GAIA::VBDPhysics::evaluateConvergence()
 				force += pMesh->vertexMass(iVert) * (pMesh->inertia.col(iVert) - pMesh->vertex(iVert)) * (physicsParams().dtSqrReciprocal);
 			}
 			pMesh->vertexInternalForces.col(iVert) = force;
-			});
+			};
+                cpu_parallel_for(0, pMesh->numVertices(), evaluateConvergenceHandler);
 		avgForceNorm += pMesh->vertexInternalForces.colwise().norm().sum();
 		//for (size_t iVert = 0; iVert < pMesh->numVertices(); iVert++)
 		//{
@@ -3518,7 +3544,8 @@ void GAIA::VBDPhysics::evaluateConvergenceGPU()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
+		//cpu_parallel_for(0, pMesh->numVertices(), [&](int iVert) {
+                auto evaluateConvergenceGPUHandler = [&](int iVert) {
 			Vec3 force;
 			Mat3 hessian;
 			force = Vec3::Zero();
@@ -3528,7 +3555,8 @@ void GAIA::VBDPhysics::evaluateConvergenceGPU()
 				force += pMesh->vertexMass(iVert) * (pMesh->inertia.col(iVert) - pMesh->vertex(iVert)) * (physicsParams().dtSqrReciprocal);
 			}
 			pMesh->vertexInternalForces.col(iVert) = force;
-			});
+			};
+                cpu_parallel_for(0, pMesh->numVertices(), evaluateConvergenceGPUHandler);
 		avgForceNorm += pMesh->vertexInternalForces.colwise().norm().sum();
 	}
 
@@ -3626,9 +3654,11 @@ void GAIA::VBDPhysics::computeElasticForceHessian()
 			pMesh->computeElasticForceHessianDouble(iTet, *(energyIter + iTet), *(forceIter + iTet), *(hessianIter + iTet));
 			});
 #else
-		cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
+		// cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
+                auto computeElasticForceHessianHandler = [&](int iTet) {
 			pMesh->computeElasticForceHessian(iTet, *(energyIter + iTet), *(forceIter + iTet), *(hessianIter + iTet));
-			});
+			};
+                cpu_parallel_for(0, pMesh->numTets(), computeElasticForceHessianHandler);
 #endif
 		//for (size_t iTet = 0; iTet < pMesh->numTets(); iTet++)
 		//{
@@ -3649,9 +3679,11 @@ void GAIA::VBDPhysics::computeElasticEnergy()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
+		// cpu_parallel_for(0, pMesh->numTets(), [&](int iTet) {
+                auto computeElasticEnergyHandler = [&](int iTet) {
 			pMesh->computeElasticEnergy(iTet, *(energyIter + iTet));
-			});
+			};
+                cpu_parallel_for(0, pMesh->numTets(), computeElasticEnergyHandler);
 		energyIter += pMesh->numTets();
 	}
 }
@@ -3675,7 +3707,8 @@ void GAIA::VBDPhysics::fillNewtonForce()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+                //		cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+                auto fillNewtonForceHandler = [&](int iV) {
 			if (!pMesh->fixedMask[iV])
 			{
 				Eigen::Map<NVec3> force(forcePtr + iV * 3);
@@ -3689,7 +3722,8 @@ void GAIA::VBDPhysics::fillNewtonForce()
 					force += elasticForcePtr[tetId].segment<3>(vertedTetVId * 3);
 				}
 			}
-			});
+			};
+                cpu_parallel_for(0, pMesh->numVertices(), fillNewtonForceHandler);
 		elasticForcePtr += pMesh->numTets();
 		forcePtr += pMesh->numVertices() * 3;
 	}
@@ -3701,7 +3735,8 @@ void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+		// cpu_parallel_for(0, pMesh->numVertices(), [&](int iV) {
+                auto fillNewtonHessianDiagonalHandler = [&](int iV) {
 
 			NMat3 hessian = NMat3::Identity() * pMesh->vertexMass(iV) * (physicsParams().dtSqrReciprocal);
 			if (!pMesh->fixedMask[iV])
@@ -3723,7 +3758,8 @@ void GAIA::VBDPhysics::fillNewtonHessianDiagonal()
 					hessianPtr++;
 				}
 			}
-			});
+			};
+                cpu_parallel_for(0, pMesh->numVertices(), fillNewtonHessianDiagonalHandler);
 		elasticHessianPtr += pMesh->numTets();
 	}
 }
@@ -3733,7 +3769,8 @@ void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 	for (size_t iMesh = 0; iMesh < numTetMeshes(); iMesh++)
 	{
 		VBDTetMeshNeoHookean* pMesh = (VBDTetMeshNeoHookean*)tMeshes[iMesh].get();
-		cpu_parallel_for(0, pMesh->numEdges(), [&](int iE) {
+		// cpu_parallel_for(0, pMesh->numEdges(), [&](int iE) {
+                auto fillNewtonHessianOffDiagonalHandler = [&](int iE) {
 			int iV = pMesh->edges()(0, iE);
 			int jV = pMesh->edges()(1, iE);
 			if (!pMesh->fixedMask[iV] && !pMesh->fixedMask[jV])
@@ -3765,7 +3802,8 @@ void GAIA::VBDPhysics::fillNewtonHessianOffDiagonal()
 					}
 				}
 			}
-			});
+			};
+                cpu_parallel_for(0, pMesh->numEdges(), fillNewtonHessianOffDiagonalHandler);
 	}
 }
 

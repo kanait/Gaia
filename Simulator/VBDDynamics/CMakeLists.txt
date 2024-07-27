@@ -5,12 +5,12 @@ find_package(CUDAToolkit 11 REQUIRED)
 project(VBDDynamics LANGUAGES CXX CUDA)
 
 ## Use C++11
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CUDA_STANDARD 11)   
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CUDA_STANDARD 17)
 
 set(BUILD_VBD ON)
 set(BUILD_PBD OFF)
-include(../cmake/GAIA-config.cmake)
+include(../CMake/GAIA-config.cmake)
 
 include_directories(
 	${GAIA_INCLUDE_DIRS}

@@ -322,9 +322,14 @@ void GAIA::TriMeshIntersectionDetector::findTriangleIntersectionPolygons()
         }
     }
 
-    cpu_parallel_for(0, allWorks.size(), [&] (int iWork) {
-        clusterIntersectionPoints(allWorks[iWork].first, allWorks[iWork].second);
-    });
+    // cpu_parallel_for(0, allWorks.size(), [&] (int iWork) {
+    //     clusterIntersectionPoints(allWorks[iWork].first, allWorks[iWork].second);
+    // });
+    auto lambdaFunc = [&](int iWork) {
+    clusterIntersectionPoints(allWorks[iWork].first, allWorks[iWork].second);
+    };
+
+    cpu_parallel_for(0, allWorks.size(), lambdaFunc);
 }
 
 void GAIA::TriMeshIntersectionDetector::clusterIntersectionPoints(int meshId, int triId)
@@ -547,7 +552,8 @@ void GAIA::TriMeshIntersectionDetector::pointInclusionTest()
     
     for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++)
     {
-        cpu_parallel_for(0, meshes[iMesh].numVertices, [&](int iSV) {
+        // cpu_parallel_for(0, meshes[iMesh].numVertices, [&](int iSV) {
+        auto lambdaFunc = [&](int iSV) {
             PointInclusionRTCContext& context = pointInclusionTestResults[iMesh][iSV];
             rtcInitIntersectContext(&context);
             context.filter = countAllHits;
@@ -595,8 +601,9 @@ void GAIA::TriMeshIntersectionDetector::pointInclusionTest()
 
             //    rtcIntersect1(triMeshSceneRayTracing, &context, &rayhit);
             //}
-            
-        });
+            //        });
+        };
+        cpu_parallel_for(0, meshes[iMesh].numVertices, lambdaFunc);
     }
 
 }

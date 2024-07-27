@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(PBDDynamics LANGUAGES CXX CUDA)
 
 ## Use C++11
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CUDA_STANDARD 11)   
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CUDA_STANDARD 17)   
 
 set(BUILD_PBD ON)
-include(../cmake/GAIA-config.cmake)
+include(../CMake/GAIA-config.cmake)
 
 include_directories(
 	${GAIA_INCLUDE_DIRS}

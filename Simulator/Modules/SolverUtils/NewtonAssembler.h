@@ -151,7 +151,7 @@ namespace GAIA {
 	template<typename T>
 	inline bool isNull(const Eigen::SparseMatrix<T>& mat, int row, int col)
 	{
-		for (Eigen::SparseMatrix<T>::InnerIterator it(mat, col); it; ++it) {
+		for (typename Eigen::SparseMatrix<T>::InnerIterator it(mat, col); it; ++it) {
 			if (it.row() == row) return false;
 		}
 		return true;

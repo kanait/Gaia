@@ -4,7 +4,8 @@
 void GUINoCompliationError() {
 	std::cout << "Error! Trying to call GUI while GUI is not complied!\n"
 		<< "You should either remove the \"--gui\" command or turn off the GAIA_NO_GUI compilation option." << std::endl;
-	throw std::exception("Trying to call uncompiled GUI components.");
+	//throw std::exception("Trying to call uncompiled GUI components.");
+	throw std::runtime_error("Trying to call uncompiled GUI components.");
 	std::exit(-1);
 }
 

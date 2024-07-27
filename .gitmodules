@@ -1,14 +1,6 @@
 [submodule "Simulator/3rdParty/cmake-git-version-tracking"]
 	path = Simulator/3rdParty/cmake-git-version-tracking
 	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git
-[submodule "Simulator/3rdParty/CuMatrix"]
-	path = Simulator/3rdParty/CuMatrix
-	url = https://github.com/AnkaChan/CuMatrix.git
-
-[submodule "Simulator/3rdParty/MeshFrame2"]
-	path = Simulator/3rdParty/MeshFrame2
-	url = https://github.com/AnkaChan/MeshFrame2.git
-
 [submodule "Simulator/3rdParty/polyscope"]
 	path = Simulator/3rdParty/polyscope
 	url = https://github.com/nmwsharp/polyscope.git

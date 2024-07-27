@@ -118,7 +118,8 @@ void GAIA::BasePhysicFramework::initialize()
 	numAllTets = 0;
 	numAllEdges = 0;
 
-	cpu_parallel_for(0, objectParamsList->objectParams.size(), [&](int iMesh) {
+	// cpu_parallel_for(0, objectParamsList->objectParams.size(), [&](int iMesh) {
+        auto lambdaFunc = [&](int iMesh) {
 		//for (int iMesh = 0; iMesh < objectParamsList->objectParams.size(); ++iMesh) {
 		TetMeshMF::SharedPtr pTM_MF;
 		std::string modelPath = objectParamsList->objectParams[iMesh]->path;
@@ -179,7 +180,9 @@ void GAIA::BasePhysicFramework::initialize()
 			std::cout << "[Error] Fail to load: " << objectParamsList->objectParams[iMesh]->path << std::endl;
 			exit(-1);
 		}
-		});
+                //		});
+        };
+        cpu_parallel_for(0, objectParamsList->objectParams.size(), lambdaFunc);
 
 	std::cout
 		<< "----------------------------------------------------\n"

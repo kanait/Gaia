@@ -65,7 +65,7 @@ namespace GAIA {
         return;
     }
 
-	GPU_CPU_INLINE_FUNC  void GAIA::accumulateInertiaForceAndHessian(VBDBaseTetMeshGPU* pTetMeshGPU, int iV, CFloatingTypeGPU dtSqrReciprocal,
+	GPU_CPU_INLINE_FUNC  void accumulateInertiaForceAndHessian(VBDBaseTetMeshGPU* pTetMeshGPU, int iV, CFloatingTypeGPU dtSqrReciprocal,
 		FloatingTypeGPU* force, FloatingTypeGPU* h)
 	{
 		CFloatingTypeGPU vertexMass = pTetMeshGPU->vertexMass[iV];
