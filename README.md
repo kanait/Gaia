@@ -1,5 +1,9 @@
 # Gaia
 
+This is an unofficial version of [Gaia](https://github.com/AnkaChan/Gaia) that has been quickly hacked to make it compilable on Linux OS while retaining the ability to compile on Windows. It has only been tested on Ubuntu 22.04 LTS.
+
+---
+
 [\[Discord\]](https://discord.gg/BRRaSmRpkm "Gaia Engine")
 > There is no copy too small to be ignored, nor design too abstract to be embraced.
 >
