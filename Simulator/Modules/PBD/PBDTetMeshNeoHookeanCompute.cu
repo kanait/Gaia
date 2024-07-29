@@ -1,5 +1,4 @@
-﻿#pragma once
-
+﻿//#pragma once
 #include "PBDTetMeshNeoHookeanCompute.h"
 #include "../Parallelization//GPUParallelization.h"
 #include "../Parallelization//CPUParallelization.h"
@@ -315,7 +314,7 @@ __device__ __host__ __forceinline__ void GAIA::solveMaterialForOneTet(int32_t te
 
 	FloatingTypeGPU CVol = solveVolConstraint(tetId, v0, v1, v2, v3, gradVol, (TetMeshFEMGPU_NeoHookean*)pTetMeshGPU);
 
-	if (pTetMeshGPU->volCompliance = 0.f)
+	if (pTetMeshGPU->volCompliance == 0.f)
 	{
 		applyToInfiniteStiffness(pTetMeshGPU->vertPos, pTetMeshGPU->vertexInvMass, tetId, tetVIds, CVol, gradVol);
 	}

@@ -1,4 +1,4 @@
-#pragma once
+// #pragma once
 #include "TriMeshCollisionGeometry.h"
 
 #define ABSOLUTE_RELAXIATION (1e-6f)

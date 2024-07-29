@@ -1,6 +1,8 @@
 # Gaia
 
-This is an unofficial version of [Gaia](https://github.com/AnkaChan/Gaia) that has been quickly hacked to make it compilable on Linux OS while retaining the ability to compile on Windows. It has only been tested on Ubuntu 22.04 LTS.
+This is an unofficial version of [Gaia](https://github.com/AnkaChan/Gaia) that has been quickly hacked to make it compilable on Linux OS while still being compilable on Windows OS. It has only been tested on Ubuntu 22.04 LTS.
+
+Please note that in this version, the submodules CuMatrix and MeshFrame2 have been made independent from their original repositories and integrated into this repository.
 
 ---
 
@@ -48,11 +50,11 @@ After loading the GAIA-config.cmake file, you need to add those commands to link
 include_directories(
 	${GAIA_INCLUDE_DIRS}
 )
-SET (YOUR_SRCS 
+SET (YOUR_SRCS
 	${YOUR_SRCS}
 	${GAIA_SRCS}
 )
-add_executable(YouApplication 
+add_executable(YouApplication
 	${YOUR_SRCS}
 )
 target_link_libraries(YouApplication ${GAIA_LIBRARY})
@@ -68,7 +70,7 @@ Those are the options that are avaiable now:
 - ```BUILD_GUI```: whether to build the GUI related source files. polyscope is needed if this option is set to true.
 - ```BUILD_Collision_Detector```: whether to build the collision detection related source files. It will be turned on if either ```BUILD_PBD``` or ```BUILD_VBD``` is on.
 
-## Gaia's VBD (Vertex Block Descent) Simulator  
+## Gaia's VBD (Vertex Block Descent) Simulator
 
 To use Gaia's VBD simulator you need to build the projected located at ```Gaia/Simulator/VBDDynamics```.
 
@@ -101,7 +103,7 @@ Additionally, you can run the experiments using these Python scripts by setting 
 ```
 Then set the "machineName" variable to your environment's name. The Python script will be able to execute the simulation.
 
-## Gaia's PBD Simulator  
+## Gaia's PBD Simulator
 The PBD simulator uses commands similar to those of the VBD simulator. However, please do not input VBD's parameters into the PBD simulator and vice versa. Instead, use the parameters located at \Simulator\PBDDynamics\ParameterGen. The syntax for running the Gaia PBD simulator is similar to that of the VBD simulator:
 ```
 Path-to-VBDDynamics.exe Models.json Parameters.json output-folder -R [PATH-to-Gaia-Repository]
@@ -115,7 +117,7 @@ GraphColoring.exe model.t model.vertexColoring.json -v -b
 "-v" means it's a vertex coloring. "-b" means it will try to balance the number of vertices in each color.
 
 ## Common Problems
-1. "Host key verification failed. fatal: Could not read from remote repository."  
+1. "Host key verification failed. fatal: Could not read from remote repository."
 This issue could be that Github isn't present in your ~/.ssh/known_hosts file.
 Append GitHub to the list of authorized hosts:
 ```ssh-keyscan -H github.com >> ~/.ssh/known_hosts```

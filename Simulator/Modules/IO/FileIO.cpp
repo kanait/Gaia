@@ -11,12 +11,12 @@ void GAIA::saveAsPly(const std::string filePath, const std::vector<std::array<Fl
 
 	FILE* fp = fopen(filePath.c_str(), "w");
 
-	fprintf(fp, "ply\nformat ascii 1.0\ncomment Mocap generated\nelement vertex %d\n", verts.size());
+	fprintf(fp, "ply\nformat ascii 1.0\ncomment Mocap generated\nelement vertex %zu\n", verts.size());
 	fprintf(fp, "property float x\nproperty float y\nproperty float z\n");
 
 	if (faces.size() != 0) {
 
-		fprintf(fp, "element face %d \nproperty list uchar int vertex_indices\n", faces.size());
+		fprintf(fp, "element face %zu \nproperty list uchar int vertex_indices\n", faces.size());
 	}
 	fprintf(fp, "end_header\n");
 

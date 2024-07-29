@@ -281,7 +281,7 @@ void GAIA::TetMeshTopology::initialize(TetMeshMF * pTM_MF, ObjectParams::SharedP
 	float avgNumberOfNeiTets = 0;
 
 	vertexNeighborTets_infos.resize(2 * pTM_MF->numVertices());
-	for (TetMeshMF::VPtr pV : TIt::TM_VIterator(pTM_MF))
+        for (TetMeshMF::VPtr pV : TIt::TM_VIterator(pTM_MF))
 	{
 		size_t numNeiTets = 0;
 		vertexNeighborTets_infos(iV * 2) = vertexNeighborTets_.size();

@@ -39,7 +39,7 @@ namespace CuMatrix
 	}
 
 	inline __host__ __device__ void printCharVec(const int8_t* v, size_t size) {
-		printf("Printing int vector of size %d\n", size);
+		printf("Printing int vector of size %zu\n", size);
 		printf("vector address %p\n", v);
 		for (int i = 0; i < size; i++) {
 			printf("%d ", int(v[i]));

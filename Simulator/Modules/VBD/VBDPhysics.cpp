@@ -3309,7 +3309,7 @@ void GAIA::VBDPhysics::prepareCollisionDataCPUAndGPU()
 			CollisionDataGPU& collisionDataCPUBuffer = pTetMesh->pTetMeshSharedBase->getCollisionDataCPUBuffer(iVert);
 			if (collisionDataCPUBuffer.activeColliding)
 			{
-				printf("Vert %d of mesh %d collide with mesh: %d, face: %d, %d, %d\n", iVert, iMesh, collisionDataCPUBuffer.intersectedTMeshId,
+				printf("Vert %zu of mesh %d collide with mesh: %d, face: %d, %d, %d\n", iVert, iMesh, collisionDataCPUBuffer.intersectedTMeshId,
 					collisionDataCPUBuffer.closestSurfaceFaceVIds[0],
 					collisionDataCPUBuffer.closestSurfaceFaceVIds[1],
 					collisionDataCPUBuffer.closestSurfaceFaceVIds[2]);
@@ -3350,7 +3350,7 @@ void GAIA::VBDPhysics::printCPUCollisionDataForVertex(IdType meshId, IdType vert
 	CollisionRelationList& colRelations = getCollisionRelationList(meshId, vertexId);
 	for (size_t iCollision = 0; iCollision < colRelations.size(); iCollision++)
 	{
-		printf("f side (%d of %d):\n", iCollision, colRelations.size());
+		printf("f side (%zu of %zu):\n", iCollision, colRelations.size());
 
 		CollisionRelation& colRelation = colRelations[iCollision];
 

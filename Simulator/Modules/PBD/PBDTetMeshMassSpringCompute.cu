@@ -5,7 +5,9 @@
 #include "../Parallelization//CPUParallelization.h"
 #include "../../3rdParty/CuMatrix/CuMatrix/MatrixOps/CuMatrix.h"
 
-#include "device_functions.h"
+//#include "device_functions.h"
+#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 
 __inline__ __host__ __device__ FloatingTypeGPU GAIA::solveMaterialForOneEdge_MassSpring(int32_t edgeId, PBDTetMeshFEMGPUMassSpring& tetMeshGPU)
 {

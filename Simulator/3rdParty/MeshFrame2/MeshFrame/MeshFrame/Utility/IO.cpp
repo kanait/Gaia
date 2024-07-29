@@ -103,7 +103,11 @@ bool IO::createFolder(std::string folderName)
                   return false;
                 }
 #endif
-		chdir(it->c_str());
+                //chdir(it->c_str());
+                if (chdir(it->c_str()) != 0) {
+                    std::cerr << "Failed to change directory to: " << *it << std::endl;
+                }
+		
 	}
 
 	return false;

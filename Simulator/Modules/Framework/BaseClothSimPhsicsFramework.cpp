@@ -1,5 +1,4 @@
-#pragma once
-
+//#pragma once
 #include "BaseClothSimPhsicsFramework.h"
 #include "../CollisionDetector/CollisionDetertionParameters.h"
 #include "../IO/FileIO.h"

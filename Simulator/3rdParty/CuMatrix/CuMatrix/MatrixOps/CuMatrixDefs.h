@@ -5,8 +5,8 @@
 #define GPU_CPU_INLINE_FUNC  __forceinline__ __device__ __host__
 #define GPU_CPU_FUNC_NO_INLINE  __device__ __host__
 
-#define SQR(x) ((x)*(x))
-#define CUBE(x) ((x)*(x)*(x))
+//#define SQR(x) ((x)*(x))
+//#define CUBE(x) ((x)*(x)*(x))
 
 #ifdef __CUDACC__
 #define HOST_FUNC               __host__

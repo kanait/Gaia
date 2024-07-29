@@ -122,7 +122,7 @@ namespace MF
 				_clear(); 
 				if (pSurfaceMesh != nullptr)
 				{
-					delete pSurfaceMesh;
+                                  delete pSurfaceMesh;
 				}
 			};
 		
@@ -477,7 +477,7 @@ namespace MF
 			/*! max vertex id */
 			int m_maxVertexId;
 
-			void* pSurfaceMesh = nullptr;
+                        void* pSurfaceMesh = nullptr;
 
 
 			MAKE_PROP_OF(V);
@@ -1603,9 +1603,9 @@ namespace MF
 		inline void CTMeshBase<DType, TVertexType, VertexType, HalfEdgeType, TEdgeType, EdgeType, HalfFaceType, FaceType, TetType>::HalfFace3Points(HalfFaceType* pHF, EigenDerived3x3& vs)
 		{
 			HalfEdgeType* pHE = HalfFaceHalfEdge(pHF);
-			vs.block<3, 1>(0, 0) = HalfEdgeSource(pHE)->position();
-			vs.block<3, 1>(0, 1) = HalfEdgeTarget(pHE)->position();
-			vs.block<3, 1>(0, 2) = HalfEdgeTarget(HalfEdgeNext(pHE))->position();
+			vs.template block<3, 1>(0, 0) = HalfEdgeSource(pHE)->position();
+			vs.template block<3, 1>(0, 1) = HalfEdgeTarget(pHE)->position();
+			vs.template block<3, 1>(0, 2) = HalfEdgeTarget(HalfEdgeNext(pHE))->position();
 		}
 
 		template<typename DType, typename TVertexType, typename VertexType, typename HalfEdgeType, typename TEdgeType, typename EdgeType, typename HalfFaceType, typename FaceType, typename TetType>
@@ -1643,7 +1643,7 @@ namespace MF
 		template<typename EigenDerived3x1>
 		inline bool CTMeshBase<DType, TVertexType, VertexType, HalfEdgeType, TEdgeType, EdgeType, HalfFaceType, FaceType, TetType>::PointInTet(TPtr pT, const HalfFaceType& p)
 		{
-			register Vec3 vs4[4] = {
+			Vec3 vs4[4] = {
 				pT->vertex(0)->position(),
 				pT->vertex(1)->position(),
 				pT->vertex(2)->position(),
@@ -1928,4 +1928,4 @@ namespace MF
 
 
 };
-#endif _MESHLIB_BASE_TET_MESH_H
+#endif // _MESHLIB_BASE_TET_MESH_H

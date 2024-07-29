@@ -28,7 +28,7 @@ namespace MF
 			TVerticesMat<DType>& vertPos() { return mVertPos; };
 			TTetIdsMat& tetVIds() { return mTetVIds; };
 
-			TVec3Block<DType> vert(size_t vId) { return mVertPos.block<3, 1>(0, vId); }
+			TVec3Block<DType> vert(size_t vId) { return mVertPos.template block<3, 1>(0, vId); }
 			Vec4BlockI tet(size_t tId) { return mTetVIds.block<4, 1>(0, tId);  }
 
 			/*! access the vertex with ID */

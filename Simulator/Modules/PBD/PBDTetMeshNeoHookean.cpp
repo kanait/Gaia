@@ -1,5 +1,4 @@
-#pragma once
-
+//#pragma once
 #include "PBDTetMeshNeoHookean.h"
 #include "PBDTetMeshNeoHookeanCompute.h"
 #include "PBDTetMeshGeneralCompute.h"
