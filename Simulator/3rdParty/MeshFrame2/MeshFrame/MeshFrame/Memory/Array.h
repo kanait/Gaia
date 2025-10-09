@@ -204,8 +204,9 @@ private:
 template<typename T, int preAllocateSize, typename SizeType=size_t>
 class CPArrayStaticBase {
 public:
-	CPArrayStaticBase()
-	{};
+    CPArrayStaticBase()
+        : mSize{0}
+    {};
 
 	~CPArrayStaticBase() {
 	}
@@ -348,7 +349,7 @@ public:
 	size_t capacity() const { return mCapacity; }
 private:
 	alignas(16) T pPreAllocated[preAllocateSize];
-	SizeType mSize = 0;
+    SizeType mSize{0};
 	const size_t mCapacity = preAllocateSize;
 };
 

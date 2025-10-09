@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <utility>
 
 //#define TURN_ON_DEBUG 
 
@@ -17,13 +18,11 @@
 
 
 template<typename Func>
-inline void cpu_parallel_for(int start, int end, Func & func) {
+inline void cpu_parallel_for(int start, int end, Func&& func) {
 	#ifdef TBB_PARALLEL 
-	//std::cout << "Run in parallel on cpu.\n";
-	tbb::parallel_for((int)start, (int)end, func);
+    tbb::parallel_for((int)start, (int)end, std::forward<Func>(func));
 	#else
-	//std::cout << "Run in serial on cpu.\n";
-	for (int index = start; index < end; ++index)
-		func (index);
+    for (int index = start; index < end; ++index)
+        func(index);
 	#endif
 }

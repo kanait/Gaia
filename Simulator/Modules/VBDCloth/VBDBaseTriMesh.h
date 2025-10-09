@@ -62,7 +62,7 @@ namespace GAIA {
 
 		virtual void handleInternalForceConstraint();
 		virtual void handleVeclocityConstraint();
-		void GAIA::VBDBaseTriMesh::clearGradient();
+		void clearGradient();
 
 		BaseClothPhsicsFramework::Ptr pPhysics;
 		VBDClothPhysicsParameters::Ptr pPhysicsParams;

@@ -156,8 +156,8 @@ void testAtomicArray() {
 	{
 		arr.clear();
 
-		std::atomic<int> successCounter = 0;
-		cpu_parallel_for(0, numThreads, [&](int i) {
+    std::atomic<int> successCounter{0};
+    cpu_parallel_for(0, numThreads, [&](int i) {
 			if (arr.push_back(i)) {
 				successCounter ++;
 			}
@@ -698,11 +698,11 @@ void simulateClothMeshStVK()
 			FloatingType avgForceNorm = computeAvgForceNorm(force);
 
 			FloatingType meAllInitial = pStVKMesh->evaluatedMeritEnergy(meInertia, meElastic_stvk, meElastic_bending);
-			FloatingType stepSize = lineSearch(pStVKMesh, meAllInitial, dx, 1.0, 0.01f, 0.5f, 12, 0,
-				meAll, meInertia, meElastic_stvk, meElastic_bending);
+            FloatingType stepSize = lineSearch(pStVKMesh, meAllInitial, dx, 1.0, 0.01f, 0.5f, 12, 0,
+                meAll, meInertia, meElastic_stvk, meElastic_bending);
 
-			force.setZero();
-			accumulateMaterialHessianAndForce(pStVKMesh, Eigen::MatrixXf(), force, true);
+            force.setZero();
+            accumulateMaterialHessianAndForce(pStVKMesh, h, force, true);
 			addInertiaHessianAndForce(pStVKMesh, dt, h, force);
 			handleFixedPoints(fixedPointList, h, force);
 			FloatingType avgForceNormNew = computeAvgForceNorm(force);

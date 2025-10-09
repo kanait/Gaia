@@ -1,8 +1,30 @@
 # Gaia
 
-This is an unofficial version of [Gaia](https://github.com/AnkaChan/Gaia) that has been quickly hacked to make it compilable on Linux OS while still being compilable on Windows OS. It has only been tested on Ubuntu 22.04 LTS.
+This is an unofficial version of [Gaia](https://github.com/AnkaChan/Gaia) that has been quickly hacked to make it compilable on Linux OS while still being compilable on Windows OS. It has been tested on Ubuntu 22.04 LTS and Ubuntu 24.04 LTS.
 
 Please note that in this version, the submodules CuMatrix and MeshFrame2 have been made independent from their original repositories and integrated into this repository.
+
+On **Ubuntu 24.04 LTS**, the default version of Embree is **4.x**.  
+Since this software requires **Embree 3**, please follow the steps below to build and install it manually.
+
+```bash
+wget https://github.com/RenderKit/embree/archive/refs/tags/v3.13.5.tar.gz
+tar zxvf v3.13.5.tar.gz
+cd embree-3.13.5
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+         -DEMBREE_TUTORIALS=OFF \
+         -DEMBREE_ISPC_SUPPORT=OFF \
+         -DCMAKE_INSTALL_PREFIX=$HOME/opt/embree3
+make -j$(nproc)
+make install
+```
+After installing Embree 3, you can compile PBDDynamics, VBDDynamics, and VBDCloth as follows:
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$HOME/opt/embree3 ..
+make -j$(nproc)
+```
+This ensures that the projects link against the correct Embree 3 installation.
 
 ---
 

@@ -3,14 +3,16 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(GAIA_VBDCloth LANGUAGES CXX CUDA)
 
-## Use C++11
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CUDA_STANDARD 11)   
+## Use C++17 (required by CuMatrix and others)
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CUDA_STANDARD 17)
+set (CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 set(BUILD_PBD OFF)
-set(BUILD_VBD OFF)
+set(BUILD_VBD ON)
 set(BUILD_VBD_Cloth ON)
-find_package(GAIA REQUIRED)
+find_package(GAIA CONFIG REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}/../CMake")
 
 include_directories(
 	${GAIA_INCLUDE_DIRS}
