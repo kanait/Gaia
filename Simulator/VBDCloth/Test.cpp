@@ -1,4 +1,4 @@
-#include "Test.h"
+﻿#include "Test.h"
 #include <common/math/vec2.h>
 #include <common/math/vec3.h>
 #include <common/math/vec4.h>
@@ -702,7 +702,10 @@ void simulateClothMeshStVK()
                 meAll, meInertia, meElastic_stvk, meElastic_bending);
 
             force.setZero();
+            // Replaced Eigen::MatrixXf with h in accumulateMaterialHessianAndForce by ChatGPT.
+            // This may be problematic, but the caller of this function currently appears unused.
             accumulateMaterialHessianAndForce(pStVKMesh, h, force, true);
+            //
 			addInertiaHessianAndForce(pStVKMesh, dt, h, force);
 			handleFixedPoints(fixedPointList, h, force);
 			FloatingType avgForceNormNew = computeAvgForceNorm(force);

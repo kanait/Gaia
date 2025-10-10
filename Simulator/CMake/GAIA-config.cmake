@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 message( "Adding GAIA." )
 
-set(CMAKE_CUDA_ARCHITECTURES 75;80;86)
+set(CMAKE_CUDA_ARCHITECTURES 75;80;86;89)
 
 find_package(Eigen3 REQUIRED)
 find_package(MeshFrame2 REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../3rdParty/MeshFrame2/MeshFrame/cmake)
